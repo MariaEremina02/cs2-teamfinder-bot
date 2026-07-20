@@ -1,0 +1,7 @@
+python-telegram-bot==21.10
+python-dotenv==1.1.0
+SQLAlchemy==2.0.36
+psycopg[binary]
+black==24.10.0
+pytest==8.3.4
+pytest-asyncio==0.25.2

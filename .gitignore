@@ -1,0 +1,22 @@
+# токен бота
+.env
+
+# Виртуальное окружение
+venv/
+.venv/
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+
+# База данных
+db.sqlite3
+
+# Настройки IDE
+.idea/
+.vscode/
+
+# Всякое
+*.log
+.DS_Store
