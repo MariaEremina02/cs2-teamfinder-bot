@@ -1,9 +1,11 @@
 import asyncio
 import logging
-from telegram.ext import ApplicationBuilder, CommandHandler
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ConversationHandler
 from config import BOT_TOKEN
+from handlers import start, choose_group, choose_rank, choose_time, back_to_groups
+from states import CHOOSING_GROUP, CHOOSING_RANK, CHOOSING_TIME
 
-# Логирование
+#Логирование
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
@@ -11,9 +13,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def start(update, context):
+async def main(update):
 
-    # Обработчик команды /start
+#Обработчик команды /start
 
     user = update.effective_user
     await update.message.reply_text(
@@ -26,22 +28,33 @@ async def start(update, context):
 
 async def main():
 
+#Запуск бота
     logger.info("🤖 Запускаем CS2 TeamFinder Bot...")
 
-    # Создание приложения
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    # Регистрация обработчика команды /start
-    app.add_handler(CommandHandler("start", start))
+#ConversationHandler для регистрации
+    registration_handler = ConversationHandler(
+        entry_points=[CommandHandler("start", start)],
+        states={
+            CHOOSING_GROUP: [CallbackQueryHandler(choose_group, pattern="^group:")],
+            CHOOSING_RANK: [
+                CallbackQueryHandler(choose_rank, pattern="^rank:"),
+                CallbackQueryHandler(back_to_groups, pattern="^back_to_groups$"),
+            ],
+            CHOOSING_TIME: [CallbackQueryHandler(choose_time, pattern="^time:")],
+        },
+        fallbacks=[],
+    )
+
+    app.add_handler(registration_handler)
 
     logger.info("✅ Бот запущен! Нажмите Ctrl+C для остановки.")
 
-    # Запуск бота
     await app.initialize()
     await app.start()
     await app.updater.start_polling()
 
-    # Тут я держу бота запущенным
     try:
         while True:
             await asyncio.sleep(1)
