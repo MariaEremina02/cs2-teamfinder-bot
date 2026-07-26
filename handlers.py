@@ -5,7 +5,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
-from database import get_or_create_user, update_user
+from database import get_or_create_user, update_user, get_user, find_teammates
 from keyboards import (
     get_group_keyboard,
     get_rank_keyboard,
@@ -22,6 +22,7 @@ from states import CHOOSING_GROUP, CHOOSING_RANK, CHOOSING_TIME
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     user = update.effective_user
+    get_or_create_user(user.id, user.username)
 
 #Создание и приветствие пользователя в БД (если его ещё нет)
     get_or_create_user(user.id, user.username)
@@ -129,3 +130,69 @@ async def choose_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     )
 
     return ConversationHandler.END
+
+
+# Кнопка "Мой профиль"
+async def show_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # Показывает профиль пользователя
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+
+    if user and user.rank:
+        await update.message.reply_text(
+            f"👤 Твой профиль:\n\n"
+            f"Звание: {user.rank}\n"
+            f"Время игры: {user.play_time}\n"
+            f"Статус: {'Активен ✅' if user.is_active else 'Неактивен ❌'}"
+        )
+    else:
+        await update.message.reply_text(
+            "❌ Профиль не найден.\n"
+            "Напиши /start, чтобы создать профиль."
+        )
+
+
+# Кнопка «Изменить профиль»
+async def change_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    # Запускает регистрацию заново для изменения профиля
+    user = update.effective_user
+
+    await update.message.reply_text(
+        f"Давай обновим твой профиль!\n\n"
+        f"Шаг 1/3: Выбери группу своего звания:",
+        reply_markup=get_group_keyboard(),
+    )
+    return CHOOSING_GROUP
+
+
+# Кнопка «Найти тиммейтов»
+async def find_teammates_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    #Ищет игрока с таким же званием
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+
+    if not user or not user.rank:
+        await update.message.reply_text(
+            "❌ Сначала создай профиль!\n"
+            "Напиши /start, чтобы зарегистрироваться."
+        )
+        return
+
+    teammates = find_teammates(user_id, user.rank)
+
+    if not teammates:
+        await update.message.reply_text(
+            f"😔 Игроков с званием «{user.rank}» пока нет.\n"
+            f"Загляни позже или расскажи о боте друзьям!"
+        )
+        return
+
+    # Формирование и показ список найденных игроков
+    text = f"🔍 Найдено игроков с званием «{user.rank}»:\n\n"
+    for i, teammate in enumerate(teammates, 1):
+        name = teammate.username or f"Игрок {teammate.telegram_id}"
+        text += f"{i}. @{name} — {teammate.play_time}\n"
+
+    text += "\nНапиши им в личку, чтобы собрать команду! 🎮"
+
+    await update.message.reply_text(text)

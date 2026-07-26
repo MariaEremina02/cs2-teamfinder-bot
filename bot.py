@@ -1,8 +1,24 @@
 import asyncio
 import logging
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ConversationHandler
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    CallbackQueryHandler,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
 from config import BOT_TOKEN
-from handlers import start, choose_group, choose_rank, choose_time, back_to_groups
+from handlers import (
+    start,
+    choose_group,
+    choose_rank,
+    choose_time,
+    back_to_groups,
+    show_profile,
+    change_profile,
+    find_teammates_handler,
+)
 from states import CHOOSING_GROUP, CHOOSING_RANK, CHOOSING_TIME
 
 #Логирование
@@ -13,29 +29,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def main(update):
-
-#Обработчик команды /start
-
-    user = update.effective_user
-    await update.message.reply_text(
-        f"👋 Привет, {user.first_name}!\n"
-        f"Я CS2 Team Finder Bot.\n"
-        f"Помогу найти тиммейтов твоего уровня.\n\n"
-        f"Скоро здесь будет регистрация."
-    )
-
-
 async def main():
-
 #Запуск бота
     logger.info("🤖 Запускаем CS2 TeamFinder Bot...")
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-#ConversationHandler для регистрации
+    # ConversationHandler для регистрации и изменения профиля
     registration_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[
+            CommandHandler("start", start),
+            MessageHandler(filters.Regex("^✏️ Изменить профиль$"), change_profile),
+        ],
         states={
             CHOOSING_GROUP: [CallbackQueryHandler(choose_group, pattern="^group:")],
             CHOOSING_RANK: [
@@ -48,6 +53,10 @@ async def main():
     )
 
     app.add_handler(registration_handler)
+
+    # Обработчики главного меню
+    app.add_handler(MessageHandler(filters.Regex("^👤 Мой профиль$"), show_profile))
+    app.add_handler(MessageHandler(filters.Regex("^🔍 Найти тиммейтов$"), find_teammates_handler))
 
     logger.info("✅ Бот запущен! Нажмите Ctrl+C для остановки.")
 
