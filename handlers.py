@@ -168,6 +168,8 @@ async def change_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 # Кнопка «Найти тиммейтов»
 async def find_teammates_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #Ищет игрока с таким же званием
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
     user_id = update.effective_user.id
     user = get_user(user_id)
 
@@ -193,6 +195,46 @@ async def find_teammates_handler(update: Update, context: ContextTypes.DEFAULT_T
         name = teammate.username or f"Игрок {teammate.telegram_id}"
         text += f"{i}. @{name} — {teammate.play_time}\n"
 
-    text += "\nНапиши им в личку, чтобы собрать команду! 🎮"
+    text += "\nНажми на кнопку ниже, чтобы написать игроку:"
 
-    await update.message.reply_text(text)
+# Кнопка для каждого игрока
+    keyboard = []
+    for teammate in teammates:
+        name = teammate.username or f"Игрок_{teammate.telegram_id}"
+        if teammate.username:
+            url = f"https://t.me/{teammate.username}"
+        else:
+            url = f"tg://user?id={teammate.telegram_id}"
+        keyboard.append([InlineKeyboardButton(f"📩 Написать @{name}", url=url)])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(text, reply_markup=reply_markup)
+
+# Обработка неизвестных сообщений от пользователя
+async def unknown_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    await update.message.reply_text(
+        "🤔 Я не понимаю эту команду.\n\n"
+        "Вот что я умею:\n"
+        "• /start — регистрация или обновление профиля\n"
+        "• 👤 Мой профиль — посмотреть данные\n"
+        "• 🔍 Найти тиммейтов — поиск игроков\n"
+        "• ✏️ Изменить профиль — обновить данные"
+    )
+
+
+# Команда /stats
+async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    from database import get_total_users_count, get_active_users_count
+
+    total = get_total_users_count()
+    active = get_active_users_count()
+
+    await update.message.reply_text(
+        f"📊 Статистика бота:\n\n"
+        f"👥 Всего пользователей: {total}\n"
+        f"🟢 Активных: {active}\n"
+        f"🔴 Неактивных: {total - active}"
+    )

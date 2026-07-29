@@ -133,3 +133,15 @@ def deactivate_user(telegram_id: int) -> User | None:
             session.commit()
             session.refresh(user)
         return user
+
+# Возврат общего количества зарегистрированных пользователей
+def get_total_users_count() -> int:
+
+    with Session(engine) as session:
+        return session.query(User).count()
+
+# Возврат количества активных пользователей
+def get_active_users_count() -> int:
+
+    with Session(engine) as session:
+        return session.query(User).filter_by(is_active=True).count()
