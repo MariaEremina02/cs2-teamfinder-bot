@@ -145,3 +145,18 @@ def get_active_users_count() -> int:
 
     with Session(engine) as session:
         return session.query(User).filter_by(is_active=True).count()
+
+# Топ званий по кол-ву пользователей (по убыванию)
+def get_top_ranks() -> list[tuple[str, int]]:
+
+    from sqlalchemy import func
+    with Session(engine) as session:
+        results = (
+            session.query(User.rank, func.count(User.id))
+            .filter(User.rank.isnot(None))
+            .group_by(User.rank)
+            .order_by(func.count(User.id).desc())
+            .limit(10)
+            .all()
+        )
+        return results

@@ -238,3 +238,39 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"🟢 Активных: {active}\n"
         f"🔴 Неактивных: {total - active}"
     )
+
+
+# Команда /top - "Топ званий"
+async def top_ranks(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # Показывает по кол-ву 10 игроков
+    from database import get_top_ranks
+
+    results = get_top_ranks()
+
+    if not results:
+        await update.message.reply_text("😔 Пока нет данных. Будь первым — зарегистрируйся через /start!")
+        return
+
+    medals = ["🥇", "🥈", "🥉"] + ["▫️"] * 7
+
+    text = "📊 <b>Топ званий CS2 TeamFinder:</b>\n\n"
+    for i, (rank, count) in enumerate(results):
+        text += f"{medals[i]} {rank} — {count} игрок(ов)\n"
+
+    await update.message.reply_text(text, parse_mode="HTML")
+
+# Помощь
+async def show_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Показывает список всех команд."""
+    await update.message.reply_text(
+        "ℹ️ Помощь по CS2 TeamFinder Bot\n\n"
+        "Команды:\n"
+        "/start — регистрация\n"
+        "/stats — статистика\n"
+        "/top — топ званий\n\n"
+        "Кнопки меню:\n"
+        "🔍 Найти тиммейтов\n"
+        "👤 Мой профиль\n"
+        "✏️ Изменить профиль\n"
+        "ℹ️ Помощь"
+    )

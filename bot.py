@@ -20,6 +20,8 @@ from handlers import (
     find_teammates_handler,
     unknown_message,
     stats,
+    show_help,
+    top_ranks,
 )
 from states import CHOOSING_GROUP, CHOOSING_RANK, CHOOSING_TIME
 
@@ -59,6 +61,9 @@ async def main():
     # Обработчики главного меню
     app.add_handler(MessageHandler(filters.Regex("^👤 Мой профиль$"), show_profile))
     app.add_handler(MessageHandler(filters.Regex("^🔍 Найти тиммейтов$"), find_teammates_handler))
+    app.add_handler(MessageHandler(filters.Regex("^ℹ️ Помощь$"), show_help))
+    app.add_handler(CommandHandler("top", top_ranks))
+
 
     # Обработчик неизвестных сообщений
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, unknown_message))

@@ -70,6 +70,7 @@ def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
         [KeyboardButton("🔍 Найти тиммейтов")],
         [KeyboardButton("👤 Мой профиль")],
         [KeyboardButton("✏️ Изменить профиль")],
+        [KeyboardButton("ℹ️ Помощь")],
     ]
     return ReplyKeyboardMarkup(
         keyboard,
