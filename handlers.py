@@ -274,3 +274,45 @@ async def show_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "✏️ Изменить профиль\n"
         "ℹ️ Помощь"
     )
+
+# Кнопка "Удалить профиль"
+async def delete_profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    from database import delete_user
+
+    user_id = update.effective_user.id
+
+    keyboard = [
+        [
+            InlineKeyboardButton("✅ Да, удалить", callback_data="confirm_delete"),
+            InlineKeyboardButton("❌ Нет, отмена", callback_data="cancel_delete"),
+        ]
+    ]
+
+    await update.message.reply_text(
+        "⚠️ Ты уверен, что хочешь удалить профиль?\n"
+        "Все данные будут потеряны.",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+
+# Подтверждение удаления
+async def confirm_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    from database import delete_user
+
+    query = update.callback_query
+    await query.answer()
+
+    user_id = update.effective_user.id
+    delete_user(user_id)
+
+    await query.edit_message_text("🗑 Профиль удалён. Чтобы создать новый, напиши /start.")
+
+# Отмена удаления
+async def cancel_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+    query = update.callback_query
+    await query.answer()
+
+    await query.edit_message_text("✅ Удаление отменено.")

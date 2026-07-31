@@ -22,6 +22,9 @@ from handlers import (
     stats,
     show_help,
     top_ranks,
+    delete_profile,
+    confirm_delete,
+    cancel_delete,
 )
 from states import CHOOSING_GROUP, CHOOSING_RANK, CHOOSING_TIME
 
@@ -63,6 +66,9 @@ async def main():
     app.add_handler(MessageHandler(filters.Regex("^🔍 Найти тиммейтов$"), find_teammates_handler))
     app.add_handler(MessageHandler(filters.Regex("^ℹ️ Помощь$"), show_help))
     app.add_handler(CommandHandler("top", top_ranks))
+    app.add_handler(MessageHandler(filters.Regex("^🗑 Удалить профиль$"), delete_profile))
+    app.add_handler(CallbackQueryHandler(confirm_delete, pattern="^confirm_delete$"))
+    app.add_handler(CallbackQueryHandler(cancel_delete, pattern="^cancel_delete$"))
 
 
     # Обработчик неизвестных сообщений

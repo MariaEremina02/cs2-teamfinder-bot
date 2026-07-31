@@ -71,6 +71,7 @@ def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
         [KeyboardButton("👤 Мой профиль")],
         [KeyboardButton("✏️ Изменить профиль")],
         [KeyboardButton("ℹ️ Помощь")],
+        [KeyboardButton("🗑 Удалить профиль")],
     ]
     return ReplyKeyboardMarkup(
         keyboard,
