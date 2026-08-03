@@ -98,4 +98,3 @@ cs2_bot/
 - screenshots/ — скриншоты
 - .gitignore
 - README
-
