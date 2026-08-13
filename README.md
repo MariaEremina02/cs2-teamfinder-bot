@@ -32,7 +32,7 @@
 ![Шаг 3](screenshots/screen3.png)
 
 # Главное меню
-![Главное меню](screenshots/screen4.png)
+![Главное меню](screenshots/screen4.v)
 
 # Поиск тиммейтов
 ![Поиск](screenshots/screen5.png)
